@@ -1,0 +1,55 @@
+# for 의문문을 활용한 노인 분류
+
+def patient_classifier (df11):
+  i = 0
+  df11['cluster'] = 0
+  for psy,dem,gender,move in zip(df11['psy'],df11['dem'],df11['gender'],df11['move']):
+      if dem == 1 :
+        df11.loc[i,'cluster'] =  '치매'
+        i += 1
+        continue
+      elif move == 1:
+        df11.loc[i,'cluster'] =  '거동불편'
+        i += 1
+        continue
+      elif psy == 1:
+          df11.loc[i,'cluster'] =  '우울증'
+          i += 1
+          continue
+      else:
+        if gender == 1:
+          df11.loc[i,'cluster'] =  '일반남성'
+          i += 1
+          continue
+        else:
+          df11.loc[i,'cluster'] =  '일반여성'
+          i += 1
+          continue
+
+  dementia = (1+ int(len(df11[df11['cluster'] == '치매'])/12)) * 4
+  unable_to_move = int((len(df11[df11['cluster']=='거동불편']) *0.1))+1
+
+
+
+  book_4_men = int(len(df11[df11['cluster']== '일반남성']) * 0.15)
+  book_4_women = int(len(df11[df11['cluster']== '일반여성']) * 0.15)
+  depression = int(len(df11[df11['cluster']== '우울증']) * 0.15) + int((book_4_men + book_4_women)*0.1)
+  normal_book = depression + book_4_men + book_4_women
+  print()
+  print()
+  print()
+  print('#OutPut')
+  print("====================================")
+  print('OO요양병원 도서배송 목록')
+  print(f'총 배송 예정인 일반도서는 {normal_book}권.\n일반도서 중 남성을 위한 책 {book_4_men}권 / 여성을 위한 책 {book_4_women}권 \n우울증 환자를 위한 책 {depression}권') #총 일반도서 권수
+  print()
+  print(f'치매노인을 위한 그림책 : {dementia}권')
+  print()
+  print(f'거동불편자를 위한 전자책 : {unable_to_move}권') #거동 불편자를 위한 전자책 대여권수
+  print("====================================")
+  print()
+  print()
+  print()
+  print()
+
+patient_classifier(df11)
