@@ -308,3 +308,16 @@ print(df_matched_moonch)
 df_matched_moonch.to_csv('matched_isbn_moonch.csv', index=False)
 
 
+## 분석 결과 (도서관 별 60대 이상 스테디 대출 도서 상위 100권 보유 현황)
+#
+# 노원중앙도서관	111058 nwcentral 98권 
+# 서울특별시교육청노원평생학습관	111022 edu 98권
+# 월계도서관	111085 moon 86권
+# 불암도서관	111485 fire 94권
+# 노원어린이도서관	111047 nwch X
+# 상계도서관	111307 up 96권
+# 화랑도서관	111239 hwa 83권
+# 하계어린이도서관	111519 downch X 
+# 월계어린이도서관	111484 moonch X
+
+
