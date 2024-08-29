@@ -26,7 +26,7 @@ def patient_classifier (df11):
           i += 1
           continue
 
-  dementia = (1+ int(len(df11[df11['cluster'] == '치매'])/12)) * 4
+  dementia = (1 + int(len(df11[df11['cluster'] == '치매'])/12)) * 4
   unable_to_move = int((len(df11[df11['cluster']=='거동불편']) *0.1))+1
   book_4_men = int(len(df11[df11['cluster']== '일반남성']) * 0.15)
   book_4_women = int(len(df11[df11['cluster']== '일반여성']) * 0.15)
@@ -55,11 +55,11 @@ patient_classifier(df11)
 ###
 
 
-## 장수 설정 기준 - 도서관법 중 [별표 1] 도서관의 종류별 시설 및 자료의 기준을 통해 계산 - 10명당 1.5권
+## 장수 설정 기준 - 도서관법 중 "[별표 1] 도서관의 종류별 시설 및 자료의 기준"을 통해 계산 - 10명당 1.5권으로 설정
 
-depression = round(len(df11[df11['cluster']== '우울증']) * 0.15,0)
-book_4_men = round(len(df11[df11['cluster']== '일반남성']) * 0.15,0)
-book_4_women = round(len(df11[df11['cluster']== '일반여성']) * 0.15,0)
+depression = round(len(df11[df11['cluster'] == '우울증']) * 0.15,0)
+book_4_men = round(len(df11[df11['cluster'] == '일반남성']) * 0.15,0)
+book_4_women = round(len(df11[df11['cluster'] == '일반여성']) * 0.15,0)
 
 print('총 일반도서 : ',round((len(df11) - len(df11[df11['cluster'] == '치매']) - len(df11[df11['cluster']=='거동불편']) - len(df11[df11['cluster'].isin(['우울증 남성','우울증 여성']) == True])) *0.15, 0)) #총 일반도서 권수
 
