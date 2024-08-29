@@ -1,4 +1,4 @@
-# for 의문문을 활용한 노인 분류
+## KLoSA(고령화연구패널)을 이용한 노인 분류
 
 def patient_classifier (df11):
   i = 0
@@ -28,17 +28,14 @@ def patient_classifier (df11):
 
   dementia = (1+ int(len(df11[df11['cluster'] == '치매'])/12)) * 4
   unable_to_move = int((len(df11[df11['cluster']=='거동불편']) *0.1))+1
-
-
-
   book_4_men = int(len(df11[df11['cluster']== '일반남성']) * 0.15)
   book_4_women = int(len(df11[df11['cluster']== '일반여성']) * 0.15)
   depression = int(len(df11[df11['cluster']== '우울증']) * 0.15) + int((book_4_men + book_4_women)*0.1)
   normal_book = depression + book_4_men + book_4_women
+
   print()
   print()
   print()
-  print('#OutPut')
   print("====================================")
   print('OO요양병원 도서배송 목록')
   print(f'총 배송 예정인 일반도서는 {normal_book}권.\n일반도서 중 남성을 위한 책 {book_4_men}권 / 여성을 위한 책 {book_4_women}권 \n우울증 환자를 위한 책 {depression}권') #총 일반도서 권수
@@ -53,3 +50,48 @@ def patient_classifier (df11):
   print()
 
 patient_classifier(df11)
+
+
+###
+
+
+## 장수 설정 기준 - 도서관법 중 [별표 1] 도서관의 종류별 시설 및 자료의 기준을 통해 계산 - 10명당 1.5권
+
+depression = round(len(df11[df11['cluster']== '우울증']) * 0.15,0)
+book_4_men = round(len(df11[df11['cluster']== '일반남성']) * 0.15,0)
+book_4_women = round(len(df11[df11['cluster']== '일반여성']) * 0.15,0)
+
+print('총 일반도서 : ',round((len(df11) - len(df11[df11['cluster'] == '치매']) - len(df11[df11['cluster']=='거동불편']) - len(df11[df11['cluster'].isin(['우울증 남성','우울증 여성']) == True])) *0.15, 0)) #총 일반도서 권수
+
+print('치매노인 : ',round(len(df11[df11['cluster'] == '치매'])/12 * 4),0) #치매환자를 위한 그림책 권수 - 읽어주기 할 때 활용(주당 1회)
+
+print('거동불편 : ',round((len(df11[df11['cluster']=='거동불편']) *0.1) + 1,0)) #거동 불편자를 위한 전자책 대여권수
+
+len(df11[df11['cluster'] == '치매']) # 일반도서 중 우울증 환자를 위한 특수 도서권수
+
+
+
+###
+
+
+## Input
+df9_sample = df9.sample(n=100)
+
+patient_classifier(df9_sample)
+
+
+## Output Sample
+
+#
+# ====================================
+# OO요양병원 도서배송 목록
+# 총 배송 예정인 일반도서는 14권.
+# 일반도서 중 남성을 위한 책 5권 / 여성을 위한 책 8권 
+# 우울증 환자를 위한 책 1권
+
+# 치매노인을 위한 그림책 : 4권
+
+# 거동불편자를 위한 전자책 : 1권
+# ====================================
+#
+
