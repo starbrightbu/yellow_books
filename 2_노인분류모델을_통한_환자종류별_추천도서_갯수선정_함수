@@ -1,81 +1,105 @@
-## KLoSA(고령화연구패널)(df11.csv)을 이용한 노인 분류
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import random
 
-# patient_classifier 함수 설정
-def patient_classifier (df11):
-  i = 0
-  df11['cluster'] = 0
-  for psy,dem,gender,move in zip(df11['psy'],df11['dem'],df11['gender'],df11['move']):
-      if dem == 1 :
-        df11.loc[i,'cluster'] =  '치매'
-        i += 1
-        continue
-      elif move == 1:
-        df11.loc[i,'cluster'] =  '거동불편'
-        i += 1
-        continue
-      elif psy == 1:
-          df11.loc[i,'cluster'] =  '우울증'
-          i += 1
-          continue
-      else:
-        if gender == 1:
-          df11.loc[i,'cluster'] =  '일반남성'
-          i += 1
-          continue
-        else:
-          df11.loc[i,'cluster'] =  '일반여성'
-          i += 1
-          continue
+hospital_list = pd.read_csv('/content/df_final_matched.csv', encoding = 'cp949')
+hospital_list
 
-## 장수 설정 기준 - 도서관법 중 "[별표 1] 도서관의 종류별 시설 및 자료의 기준"을 통해 계산 - 10명당 1.5권으로 설정
-  # 치매환자를 위한 그림책 권수 - '읽어주기' 등의 프로그램 시 활용 (주 당 1회, 프로그램 당 정원 12명 가정)
-  dementia = (1 + int(len(df11[df11['cluster'] == '치매'])/12)) * 4
-  # 일반 요양병원 입소자를 위한 일반 도서
-  book_4_men = int(len(df11[df11['cluster']== '일반남성']) * 0.15)
-  book_4_women = int(len(df11[df11['cluster']== '일반여성']) * 0.15)
 
-  depression = int(len(df11[df11['cluster']== '우울증']) * 0.15) + int((book_4_men + book_4_women)*0.1)
+steady_seller = pd.read_csv('/content/steady_60_100.csv')
+steady_seller
 
-  normal_book = depression + book_4_men + book_4_women
+isbn_list = pd.DataFrame({'lib_name':['노원중앙도서관', '서울특별시교육청노원평생학습관', '상계도서관', '월계도서관', '화랑도서관'],
+                          'isbn_file':['matched_isbn_nwcentral.csv','matched_isbn_edu.csv','matched_isbn_up.csv','matched_isbn_moon.csv','matched_isbn_hwa.csv']})
+
+isbn_list
+
+isbn_name = isbn_list.loc[isbn_list['lib_name']==library_name,'isbn_file'].values[0]
+
+isbn_name
+
+def patient_classifier():
+  #환자 정보 입력
+  hospital_name = input('병원명을 입력하세요 : ')
+
+  print()
+  print('연결중...')
+
+  library_name = hospital_list.loc[hospital_list['hos']== hospital_name,'lib'].values[0]
+  isbn_name = isbn_list.loc[isbn_list['lib_name']==library_name,'isbn_file'].values[0]
+  isbn_file = pd.read_csv(f'/content/{isbn_name}')
+  hospital_patient = hospital_list.loc[hospital_list['hos']== hospital_name,'hos_ppl'].values[0]
+
+  print()
+  print(f'{library_name}과 연결이 완료되었습니다.')
+  print()
+  print(f'총 환자 수는 {hospital_patient}명입니다.')
+  print()
+
+
+  patient_dementia = int(input('치매노인 수를 입력하세요'))
+  patient_depression = int(input('우울증 환자 수를 입력하세요'))
+  patient_female = int(input('여성 일반 환자 수를 입력하세요'))
+  normal_patient = hospital_patient - patient_dementia - patient_depression
+
+  #수요 파악
+  hospital_demand = hospital_list.loc[hospital_list['hos']== hospital_name,'hos_book'].values[0]
+  dementia_demand = int(hospital_demand * (patient_dementia / hospital_patient))
+  depression_demand = int(hospital_demand * (patient_depression / hospital_patient))
+
+  normal_demand = hospital_demand - dementia_demand - depression_demand
+
+  female_demand = int(normal_demand * (patient_female / normal_patient))
+
+  demand_list = [dementia_demand, depression_demand, female_demand]
+
+  for i in demand_list:
+    if i > hospital_demand:
+      i = hospital_demand
+
+
+  male_demand = hospital_demand - dementia_demand - depression_demand - female_demand
+
+  library_name = hospital_list.loc[hospital_list['hos']== hospital_name,'lib'].values[0]
+  isbn_name = isbn_list.loc[isbn_list['lib_name']==library_name,'isbn_file'].values[0]
+  isbn_file = pd.read_csv(f'/content/{isbn_name}')
+
+
+  random_index = random.sample(range(0, len(isbn_file)), normal_demand)
+  result = isbn_file.iloc[random_index]
+  book_list = result['Matched ISBN'].tolist()
+  isbn_books = pd.merge(result, steady_seller, left_on='Matched ISBN', right_on='ISBN', how='left')
+  isbn_books = isbn_books.loc[:,['Matched ISBN','서명','권','저자','KDC']]
+
+
+
 
   print()
   print()
   print()
+  print('#OutPut')
   print("====================================")
-  print('OO요양병원 도서배송 목록')
+  print(f'{hospital_name} 도서배송 목록')
+  print(f'연결 도서관은 {library_name}입니다.')
   print()
-  print(f'총 배송 예정인 일반도서는 {normal_book}권 입니다.\n일반도서 중 남성을 위한 책 {book_4_men}권 / 여성을 위한 책 {book_4_women}권과 \n우울증 환자를 위한 책 {depression}권이 배송 예정입니다.') #총 일반도서 권수
+  print(f'총 배송 예정인 일반도서는 {normal_demand}권.\n일반도서 중 남성을 위한 책 {male_demand}권 / 여성을 위한 책 {female_demand}권 \n우울증 환자를 위한 책 {depression_demand}권') #총 일반도서 권수
   print()
-  print(f'치매노인을 위한 그림책 {dementia}권이 추가로 배송됩니다.')
+  print(f'치매노인을 위한 그림책 : {dementia_demand}권')
+  print()
+  print(f'총 {hospital_demand}권 발송예정입니다.')
+  print('아래는 배송 도서 목록입니다.')
   print("====================================")
   print()
   print()
   print()
   print()
 
-patient_classifier(df11)
 
 
-###
+  return isbn_books
 
 
-## Input
-df9_sample = df9.sample(n=100)
-
-patient_classifier(df9_sample)
-
-
-## Output Sample
-
-#
-# ====================================
-# OO요양병원 도서배송 목록
-# 
-# 총 배송 예정인 일반도서는 14권입니다.
-# 일반도서 중 남성을 위한 책 5권 / 여성을 위한 책 8권과
-# 우울증 환자를 위한 책 1권이 배송 예정입니다.
-# 
-# 치매노인을 위한 그림책 4권이 추가로 배송됩니다.
-# ====================================
-#
+patient_classifier()
 
